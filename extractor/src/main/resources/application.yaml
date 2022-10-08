@@ -2,7 +2,7 @@ spring:
   application:
     name: car-finder-extractor
   profiles:
-    active: mycar, logger-debug
+    active: express-cars, logger-debug
 
 server:
   port: 8080

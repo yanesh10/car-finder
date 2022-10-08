@@ -1,0 +1,7 @@
+express-cars:
+  extractor:
+    baseUrl: 'https://www.lexpresscars.mu/search-vehicles/'
+    defaultParams: 'condition=used-cars'
+    transmissionFilter: 'transmission=automatic'
+    pageParam: 'page/'
+    

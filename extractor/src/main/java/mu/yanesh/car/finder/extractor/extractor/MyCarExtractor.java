@@ -7,6 +7,7 @@ import mu.yanesh.car.finder.models.extractor.CarData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -18,10 +19,9 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 @Slf4j
+@Profile("mycar")
 public class MyCarExtractor implements IExtractor {
 
-    private static final String CAR_DATA_LIST_SIZE = "CarData list size: {}";
-    private static final String URL_CALLED = "URL called: {}";
     private static final String CLASS = "class";
     private final MyCarConfigurationProperties myCarConfig;
 
@@ -29,11 +29,11 @@ public class MyCarExtractor implements IExtractor {
     public StringBuilder generateUrl(int pageNumber) {
         StringBuilder url =  new StringBuilder(myCarConfig.getBaseUrl())
                 .append(QUESTION_MARK).append(myCarConfig.getDefaultParams())
-                .append(QUESTION_MARK).append(myCarConfig.getTransmissionFilter())
-                .append(QUESTION_MARK).append(myCarConfig.getFuelTypeFilter());
+                .append(AND).append(myCarConfig.getTransmissionFilter())
+                .append(AND).append(myCarConfig.getFuelTypeFilter());
 
         if (pageNumber >= 1) {
-            url.append(QUESTION_MARK).append(myCarConfig.getPageParam()).append(pageNumber);
+            url.append(AND).append(myCarConfig.getPageParam()).append(pageNumber);
         }
         return url;
     }
