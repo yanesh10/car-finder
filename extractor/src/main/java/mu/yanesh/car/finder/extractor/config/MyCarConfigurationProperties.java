@@ -1,4 +1,4 @@
-package mu.car.finder.extractor.config;
+package mu.yanesh.car.finder.extractor.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,4 +17,5 @@ public class MyCarConfigurationProperties {
     private String defaultParams;
     private String transmissionFilter;
     private String fuelTypeFilter;
+    private String pageParam;
 }

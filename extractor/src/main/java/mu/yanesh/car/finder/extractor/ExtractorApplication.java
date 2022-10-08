@@ -1,4 +1,4 @@
-package mu.car.finder.extractor;
+package mu.yanesh.car.finder.extractor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

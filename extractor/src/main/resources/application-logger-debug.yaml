@@ -1,0 +1,3 @@
+logging:
+  level:
+    mu.yanesh.car.finder: DEBUG
