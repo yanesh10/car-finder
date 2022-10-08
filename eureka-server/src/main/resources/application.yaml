@@ -1,6 +1,13 @@
 spring:
   application:
     name: eureka-server
+  profiles:
+    active: logger
 
 server:
   port: 9000
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
