@@ -2,11 +2,17 @@ plugins {
     id 'org.springframework.boot' version '2.7.4'
     id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'java-library'
+
 group = 'mu.yanesh.car.finder'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
+version = '1.0.0'
+sourceCompatibility = '11'
 
 configurations {
     compileOnly {
@@ -27,4 +33,33 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier "sources"
+}
+
+bootRun.enabled = false
+bootJar.enabled = false
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'common-library'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
 }

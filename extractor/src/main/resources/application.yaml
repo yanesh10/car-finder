@@ -1,6 +1,11 @@
 spring:
   application:
     name: car-finder-extractor
+  profiles:
+    active: mycar
 
 server:
-  port: 0
+  port: 8080
+  
+api:
+  version: 1.0

@@ -1,0 +1,6 @@
+mycar:
+  extractor:
+    baseUrl: 'https://www.mycar.mu/car/buy'
+    defaultParams: 'display=card&order_by=date_updated'
+    transmissionFilter: 'transmission=2'
+    fuelTypeFilter: 'fuel[5]=5'
