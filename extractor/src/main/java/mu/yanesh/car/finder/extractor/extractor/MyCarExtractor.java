@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +22,7 @@ public class MyCarExtractor implements IExtractor {
 
     private static final String CAR_DATA_LIST_SIZE = "CarData list size: {}";
     private static final String URL_CALLED = "URL called: {}";
+    private static final String CLASS = "class";
     private final MyCarConfigurationProperties myCarConfig;
 
     @Override
@@ -69,7 +71,7 @@ public class MyCarExtractor implements IExtractor {
     @Override
     public void transform(Document document, List<CarData> carDataList) {
 
-        carDataList.addAll(document.getElementById("main")
+        carDataList.addAll(Objects.requireNonNull(document.getElementById("main"))
                 .getElementsByClass("col-sm-6 col-md-4 d-flex")
                 .stream()
                 .map(row -> row.childNode(1))
@@ -89,7 +91,7 @@ public class MyCarExtractor implements IExtractor {
                     String fuelType = detailsBlock.childNode(7).childNode(3).childNode(0).childNode(0).toString();
                     String year = detailsBlock.childNode(7).childNode(5).childNode(0).childNode(0).toString();
                     String price = detailsBlock.childNodes().stream()
-                            .filter(node -> node.attr("class").equals("price-block"))
+                            .filter(node -> node.attr(CLASS).equals("price-block"))
                             .findFirst()
                             .map(value -> value.childNode(0).childNode(1).toString())
                             .orElse(null);
@@ -108,21 +110,21 @@ public class MyCarExtractor implements IExtractor {
 
     @Override
     public void process() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int getTotalPageNumber(Document document) {
-        return document.getElementsByClass("pagination")
-                .first()
+        return Objects.requireNonNull(document.getElementsByClass("pagination")
+                        .first())
                 .childNodes().stream()
                 .filter(node -> node.attributesSize() > 0)
                 .filter(el -> el.childNodeSize() == 1)
-                .filter(el -> !el.attr("class").contains("active"))
-                .filter(el -> !el.attr("class").contains("disabled"))
+                .filter(el -> !el.attr(CLASS).contains("active"))
+                .filter(el -> !el.attr(CLASS).contains("disabled"))
                 .reduce((first, second) -> second)
                 .map(el -> el.childNode(0).childNode(0))
-                .map(el -> Integer.valueOf(el.toString()).intValue())
+                .map(el -> Integer.valueOf(el.toString()))
                 .orElse(1);
     }
 }
