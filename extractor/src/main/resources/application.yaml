@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: car-finder-extractor
+
+server:
+  port: 0
