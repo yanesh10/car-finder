@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: car-finder-extractor
+          uri: lb://car-finder-extractor
+          predicates:
+            - Path=/api/1.0/extractor/**
+      
