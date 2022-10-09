@@ -5,12 +5,12 @@ services:
     ports:
       - 27017-27019:27017-27019
     volumes:
-      - /mongo-data:/data/mongo
+      - ./mongo-data:/data/mongo
       
   activemq:
     image: apache/activemq
     ports:
       - 61616:61616
     volumes:
-      - /activemq/data:/data/activemq
-      - /activemq/log:/var/log/activemq
+      - ./activemq/data:/data/activemq
+      - ./activemq/log:/var/log/activemq

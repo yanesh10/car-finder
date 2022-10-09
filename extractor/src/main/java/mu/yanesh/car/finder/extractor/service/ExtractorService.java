@@ -9,4 +9,6 @@ public interface ExtractorService {
     void saveAll(List<CarData> carDataList);
     void save(CarData carData);
 
+    void clearCollection();
+
 }

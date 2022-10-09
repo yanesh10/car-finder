@@ -31,4 +31,9 @@ public class ExtractorServiceImpl implements ExtractorService {
         }
         carDataRepository.save(carData, CarDataRepository.COLLECTION_NAME);
     }
+
+    @Override
+    public void clearCollection() {
+        carDataRepository.deleteAll(CarDataRepository.COLLECTION_NAME);
+    }
 }

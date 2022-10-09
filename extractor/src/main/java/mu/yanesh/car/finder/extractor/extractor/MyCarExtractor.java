@@ -31,7 +31,7 @@ public class MyCarExtractor extends AbstractExtractor implements IExtractor {
 
     @Override
     public StringBuilder generateUrl(int pageNumber) {
-        StringBuilder url =  new StringBuilder(myCarConfig.getBaseUrl())
+        StringBuilder url = new StringBuilder(myCarConfig.getBaseUrl())
                 .append(QUESTION_MARK).append(myCarConfig.getDefaultParams())
                 .append(AND).append(myCarConfig.getTransmissionFilter())
                 .append(AND).append(myCarConfig.getFuelTypeFilter());
@@ -91,9 +91,9 @@ public class MyCarExtractor extends AbstractExtractor implements IExtractor {
                             : "";
                     String title = title1 + title2;
 
-                    String transmission = detailsBlock.childNode(7).childNode(1).childNode(0).childNode(0).toString();
-                    String fuelType = detailsBlock.childNode(7).childNode(3).childNode(0).childNode(0).toString();
-                    String year = detailsBlock.childNode(7).childNode(5).childNode(0).childNode(0).toString();
+                    String transmission = getValue(detailsBlock, 1);
+                    String fuelType = getValue(detailsBlock, 3);
+                    String year = getValue(detailsBlock, 5);
                     String price = detailsBlock.childNodes().stream()
                             .filter(node -> node.attr(CLASS).equals("price-block"))
                             .findFirst()
@@ -110,6 +110,14 @@ public class MyCarExtractor extends AbstractExtractor implements IExtractor {
                             .transmission(transmission)
                             .build();
                 }).collect(Collectors.toList()));
+    }
+
+    private String getValue(Node detailsBlock, int i) {
+        if (detailsBlock.childNode(7).childNodes().isEmpty() || detailsBlock.childNode(7).childNodeSize() >= i || detailsBlock.childNode(7).childNode(i).childNodes()
+                .isEmpty()) {
+            return "";
+        }
+        return detailsBlock.childNode(7).childNode(i).childNode(0).childNode(0).toString();
     }
 
     @Override
