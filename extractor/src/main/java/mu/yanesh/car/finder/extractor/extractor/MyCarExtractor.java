@@ -1,8 +1,8 @@
 package mu.yanesh.car.finder.extractor.extractor;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mu.yanesh.car.finder.extractor.config.MyCarConfigurationProperties;
+import mu.yanesh.car.finder.extractor.service.ExtractorService;
 import mu.yanesh.car.finder.models.extractor.CarData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,13 +17,17 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 @Profile("mycar")
-public class MyCarExtractor implements IExtractor {
+public class MyCarExtractor extends AbstractExtractor implements IExtractor {
 
     private static final String CLASS = "class";
     private final MyCarConfigurationProperties myCarConfig;
+
+    public MyCarExtractor(ExtractorService extractorService, MyCarConfigurationProperties myCarConfig) {
+        super(extractorService);
+        this.myCarConfig = myCarConfig;
+    }
 
     @Override
     public StringBuilder generateUrl(int pageNumber) {
@@ -85,7 +89,7 @@ public class MyCarExtractor implements IExtractor {
                     String title1 = titleNode.childNode(0).toString();
                     String title2 = titleNode.childNodeSize() > 1 ? titleNode.childNode(1).childNode(0).toString()
                             : "";
-                    String title = new StringBuilder(title1).append(title2).toString();
+                    String title = title1 + title2;
 
                     String transmission = detailsBlock.childNode(7).childNode(1).childNode(0).childNode(0).toString();
                     String fuelType = detailsBlock.childNode(7).childNode(3).childNode(0).childNode(0).toString();
@@ -106,11 +110,6 @@ public class MyCarExtractor implements IExtractor {
                             .transmission(transmission)
                             .build();
                 }).collect(Collectors.toList()));
-    }
-
-    @Override
-    public void process() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

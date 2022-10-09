@@ -1,14 +1,13 @@
 package mu.yanesh.car.finder.extractor.extractor;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mu.yanesh.car.finder.extractor.config.ExpressCarConfigurationProperties;
+import mu.yanesh.car.finder.extractor.service.ExtractorService;
 import mu.yanesh.car.finder.models.extractor.CarData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.select.Elements;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -16,20 +15,34 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
-@AllArgsConstructor
 @Slf4j
 @Profile("express-cars")
-public class ExpressCarsExtractor implements IExtractor {
+public class ExpressCarsExtractor extends AbstractExtractor implements IExtractor {
 
+    private static final String BLANK = "";
+    private static final String META_MIDDLE_UNIT_FONT_EXISTS_MILEAGE = "meta-middle-unit font-exists mileage";
+    private static final String META_MIDDLE_UNIT_FONT_EXISTS_FUEL = "meta-middle-unit font-exists fuel";
+    private static final String LISTING_LIST_LOOP_STM_LISTING_DIRECTORY_LIST_LOOP_STM_ISOTOPE_LISTING_ITEM = " listing-list-loop stm-listing-directory-list-loop stm-isotope-listing-item ";
     private final ExpressCarConfigurationProperties expressCarConfigs;
+
+    public ExpressCarsExtractor(ExtractorService extractorService,
+            ExpressCarConfigurationProperties expressCarConfigs) {
+        super(extractorService);
+        this.expressCarConfigs = expressCarConfigs;
+    }
 
     @Override
     public StringBuilder generateUrl(int pageNumber) {
-        StringBuilder url =  new StringBuilder(expressCarConfigs.getBaseUrl());
+        StringBuilder url = new StringBuilder(expressCarConfigs.getBaseUrl());
         if (pageNumber >= 1) {
             url.append(expressCarConfigs.getPageParam()).append(pageNumber);
         }
@@ -40,7 +53,7 @@ public class ExpressCarsExtractor implements IExtractor {
 
     @Override
     public List<CarData> extract() {
-        log.info("STARTING EXTRACTION FOR MYCAR");
+        log.info("STARTING EXTRACTION FOR EXPRESS CARS");
         List<CarData> carDataList = new ArrayList<>();
         Document document;
         int totalPageNumber = 0;
@@ -53,7 +66,7 @@ public class ExpressCarsExtractor implements IExtractor {
             transform(document, carDataList);
             log.debug(CAR_DATA_LIST_SIZE, carDataList.size());
 
-            for (int pageNum = 1; pageNum < totalPageNumber; pageNum++) {
+            for (int pageNum = 2; pageNum < totalPageNumber; pageNum++) {
                 log.debug(URL_CALLED, generateUrl(pageNum).toString());
                 document = Jsoup.connect(generateUrl(pageNum).toString())
                         .userAgent(MOZILLA)
@@ -64,26 +77,26 @@ public class ExpressCarsExtractor implements IExtractor {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-        log.info("ENDED EXTRACTION FOR MYCAR");
+        log.info("ENDED EXTRACTION FOR EXPRESS CARS");
         return carDataList;
     }
 
     @Override
     public void transform(Document document, List<CarData> carDataList) {
-        carDataList.addAll(document.getElementsByClass(" listing-list-loop stm-listing-directory-list-loop "
-                + "stm-isotope-listing-item ").stream().map(element -> {
+        carDataList.addAll(document.getElementsByClass(
+                LISTING_LIST_LOOP_STM_LISTING_DIRECTORY_LIST_LOOP_STM_ISOTOPE_LISTING_ITEM).stream().map(element -> {
             Node image = element.childNode(1);
             String title = image.childNode(3).attr("data-title");
             String originalUrl = image.childNode(5).attr("href");
             String imageUrl = image.childNode(5).childNode(1).childNode(1).attr("src");
 
             Node content = element.childNode(3);
-            String price = StringUtils.trimAllWhitespace(content.childNode(1).childNode(1).childNode(1).childNode(1).childNode(0).toString()).replace("Rs","");
-            String fuelType =
-                    Objects.nonNull(content.childNode(3).childNode(1).childNodeSize() >= 5) ?
-                            StringUtils.trimAllWhitespace(content.childNode(3).childNode(1).childNode(5).childNode(3).childNode(0).toString()) : "";
-            String mileage = Objects.nonNull(content.childNode(3).childNode(1).childNodeSize() >= 5) ?
-                    StringUtils.trimAllWhitespace(content.childNode(3).childNode(1).childNode(1).childNode(3).childNode(0).toString()) : "";
+            String price = StringUtils.trimAllWhitespace(
+                    content.childNode(1).childNode(1).childNode(1).childNode(1).childNode(0).toString()).replace("Rs",
+                    BLANK);
+            String fuelType = getValue((Element) content, META_MIDDLE_UNIT_FONT_EXISTS_FUEL);
+            String mileage = StringUtils.trimAllWhitespace(getValue((Element) content,
+                    META_MIDDLE_UNIT_FONT_EXISTS_MILEAGE));
 
             return CarData.builder()
                     .price(price)
@@ -96,9 +109,19 @@ public class ExpressCarsExtractor implements IExtractor {
         }).collect(Collectors.toList()));
     }
 
-    @Override
-    public void process() {
-
+    private String getValue(Element content, String s) {
+        if (content.getElementsByClass(s).isEmpty()
+                || content.getElementsByClass(s).get(0).getElementsByClass("value").isEmpty()) {
+            return BLANK;
+        }
+        return Optional.of(
+                        Objects.requireNonNull(content.getElementsByClass(s)
+                                        .get(0)
+                                        .getElementsByClass("value")
+                                        .first())
+                                .childNode(0)
+                                .toString())
+                .orElse(BLANK);
     }
 
     @Override

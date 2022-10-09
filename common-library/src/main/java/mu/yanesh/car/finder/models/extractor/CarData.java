@@ -2,10 +2,14 @@ package mu.yanesh.car.finder.models.extractor;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Builder
-public class CarData {
+@Document
+@EqualsAndHashCode(callSuper = false)
+public class CarData extends AbstractModel {
 
     private String title;
     private String price;

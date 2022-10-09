@@ -1,10 +1,12 @@
 package mu.yanesh.car.finder.extractor.service;
 
-import org.springframework.stereotype.Service;
+import mu.yanesh.car.finder.models.extractor.CarData;
 
-@Service
-public class ExtractorService {
+import java.util.List;
 
+public interface ExtractorService {
 
+    void saveAll(List<CarData> carDataList);
+    void save(CarData carData);
 
 }

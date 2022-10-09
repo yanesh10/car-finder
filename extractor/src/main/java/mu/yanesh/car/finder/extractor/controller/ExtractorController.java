@@ -18,7 +18,7 @@ public class ExtractorController {
 
     @GetMapping("/extract")
     public ResponseEntity<Boolean> extract() {
-        extractors.forEach(IExtractor::extract);
+        extractors.forEach(IExtractor::process);
         return ResponseEntity.ok(true);
     }
 }
